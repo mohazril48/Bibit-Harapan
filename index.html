@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bibit Harapan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  /* Root and Reset */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: #7B4F27; /* brown soil */
+    font-family: 'Poppins', sans-serif;
+    color: #F1E6D1;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .container {
+    position: relative;
+    width: 320px;
+    height: 420px;
+    text-align: center;
+    user-select: none;
+  }
+
+  h1 {
+    font-weight: 700;
+    margin-bottom: 40px;
+    font-size: 2.8rem;
+    text-shadow: 2px 2px 4px #3a2b16;
+  }
+
+  /* Seedling animation container */
+  .seedling-container {
+    position: relative;
+    width: 120px;
+    height: 160px;
+    margin: 0 auto 40px auto;
+  }
+
+  /* Seedling sprout animation using CSS */
+  .seedling-stem {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 8px;
+    height: 0;
+    background: #3C6E2E;
+    border-radius: 4px;
+    transform: translateX(-50%);
+    animation: grow-stem 3s ease forwards;
+    animation-delay: 0.3s;
+  }
+  @keyframes grow-stem {
+    to {
+      height: 80px;
+    }
+  }
+  /* Leaf style */
+  .leaf {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #6ABD45 40%, #3C6E2E 100%);
+    border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+
+  .leaf.left {
+    left: 15px;
+    bottom: 70px;
+    transform-origin: right center;
+    animation: leaf-grow-left 1.5s ease forwards;
+    animation-delay: 2.5s;
+    box-shadow: inset 2px 4px 8px rgba(0,0,0,0.15);
+  }
+  @keyframes leaf-grow-left {
+    0% {
+      opacity: 0;
+      transform: scale(0) rotate(-25deg);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(-10deg);
+    }
+  }
+
+  .leaf.right {
+    right: 15px;
+    bottom: 75px;
+    transform-origin: left center;
+    animation: leaf-grow-right 1.5s ease forwards;
+    animation-delay: 3s;
+    box-shadow: inset -2px 4px 8px rgba(0,0,0,0.15);
+  }
+  @keyframes leaf-grow-right {
+    0% {
+      opacity: 0;
+      transform: scale(0) rotate(25deg);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(10deg);
+    }
+  }
+
+  /* Seed */
+  .seed {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 18px;
+    background: #6B4C28;
+    border-radius: 25px / 50%;
+    box-shadow: inset -2px -1px 4px rgba(0,0,0,0.4);
+    animation: seed-drop 2.5s ease forwards;
+  }
+  @keyframes seed-drop {
+    0% {
+      bottom: 60px;
+      opacity: 0;
+      transform: translateX(-50%) rotate(90deg) scale(0.5);
+    }
+    80% {
+      bottom: -15px;
+      opacity: 1;
+      transform: translateX(-50%) rotate(0deg) scale(1);
+    }
+    100% {
+      bottom: -15px;
+      opacity: 1;
+      transform: translateX(-50%) rotate(0deg) scale(1);
+    }
+  }
+
+  /* Button styling */
+  button#plantButton {
+    background: #4C772E;
+    color: #F1E6D1;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 14px 48px;
+    border-radius: 36px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(76,119,46,0.7);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  button#plantButton:hover {
+    background: #6CBD48;
+    box-shadow: 0 8px 16px rgba(108,189,72,0.9);
+  }
+  button#plantButton:active {
+    background: #3D5E23;
+    box-shadow: 0 3px 6px rgba(61,94,35,0.7);
+  }
+  button#plantButton:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+
+  /* The reveal container for one plant + hope */
+  #resultContainer {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 300px;
+    background: rgba(76,119,46,0.2);
+    border-radius: 18px;
+    box-shadow: 0 12px 24px rgba(22,44,14,0.9);
+    padding: 24px 32px;
+    color: #E9F1D6;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    user-select: text;
+    backdrop-filter: blur(6px);
+    transition: opacity 0.8s ease;
+  }
+  #resultContainer.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Plant svg size inside result */
+  #resultContainer svg {
+    width: 110px;
+    height: 110px;
+    margin-bottom: 20px;
+    filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.6));
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="main" aria-label="Bibit Harapan website">
+    <h1>Bibit Harapan</h1>
+    <div class="seedling-container" aria-label="Animasi bibit tumbuhan" id="seedling">
+      <div class="seedling-stem"></div>
+      <div class="leaf left"></div>
+      <div class="leaf right"></div>
+      <div class="seed"></div>
+    </div>
+    <button id="plantButton" aria-label="Tombol tanam bibit">Tanam Bibit</button>
+
+    <div id="resultContainer" aria-live="polite" aria-atomic="true" aria-label="Hasil tanaman dan harapan"></div>
+  </div>
+
+<script>
+  const button = document.getElementById('plantButton');
+  const seedling = document.getElementById('seedling');
+  const resultContainer = document.getElementById('resultContainer');
+
+  const plants = [
+    {
+      name: "Bunga Matahari",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" >
+        <circle cx="32" cy="32" r="14" fill="#FFD93B"/>
+        <path d="M18 18L28 28M18 46L28 36M46 46L36 36M46 18L36 28M32 2L32 18M32 46L32 62M2 32L18 32M46 32L62 32" stroke="#F4A261" stroke-width="3" stroke-linecap="round"/>
+      </svg>`
+    },
+    {
+      name: "Daun",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" >
+        <path d="M32 2C14 2 2 14 2 32C2 50 14 62 32 62C50 62 62 50 62 32C62 14 50 2 32 2Z" fill="#6ABD45"/>
+        <path d="M20 32C24 40 40 40 44 32C40 28 24 28 20 32Z" fill="#388E3C"/>
+      </svg>`
+    },
+    {
+      name: "Kaktus",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" >
+        <rect x="26" y="16" width="12" height="32" rx="6" fill="#4C772E"/>
+        <rect x="18" y="28" width="8" height="16" rx="4" fill="#516E27"/>
+        <rect x="38" y="28" width="8" height="16" rx="4" fill="#516E27"/>
+        <circle cx="38" cy="20" r="4" fill="#7CBF56"/>
+        <circle cx="18" cy="20" r="4" fill="#7CBF56"/>
+      </svg>`
+    },
+    {
+      name: "Pohon Kecil",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" >
+        <rect x="28" y="40" width="8" height="16" fill="#6B4C28"/>
+        <circle cx="32" cy="28" r="18" fill="#3C6E2E"/>
+      </svg>`
+    },
+    {
+      name: "Bambu",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" >
+        <rect x="30" y="12" width="4" height="40" fill="#5DAA2D"/>
+        <rect x="26" y="26" width="12" height="6" fill="#76BD41" rx="1"/>
+        <rect x="26" y="38" width="12" height="6" fill="#76BD41" rx="1"/>
+      </svg>`
+    },
+    {
+      name: "Mawar Merah",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+        <circle cx="32" cy="32" r="14" fill="#D32F2F"/>
+        <path d="M20 32Q32 22 44 32Q32 42 20 32Z" fill="#9B1B1B" />
+        <rect x="30" y="38" width="4" height="16" fill="#4A2E2E" rx="2"/>
+      </svg>`
+    },
+    {
+      name: "Tulip",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+        <path d="M32 14C28 14 24 22 24 28C24 34 28 40 32 40C36 40 40 34 40 28C40 22 36 14 32 14Z" fill="#E57373"/>
+        <rect x="30" y="40" width="4" height="16" fill="#4C772E" rx="2"/>
+      </svg>`
+    },
+    {
+      name: "Lavender",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+        <rect x="30" y="12" width="4" height="36" fill="#9370DB" rx="1.5"/>
+        <circle cx="32" cy="24" r="6" fill="#D8BFD8"/>
+        <circle cx="32" cy="36" r="4" fill="#BBA0E2"/>
+      </svg>`
+    },
+    {
+      name: "Bunga Matahari Kecil",
+      svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+        <circle cx="32" cy="32" r="10" fill="#FDD835"/>
+        <path d="M22 22L30 30M22 42L30 34M42 42L34 34M42 22L34 30M32 8L32 22M32 42L32 56M8 32L22 32M42 32L56 32" stroke="#FBC02D" stroke-width="2" stroke-linecap="round"/>
+      </svg>`
+    }
+  ];
+
+  const hopes = [
+    "hidup menjadi menyenangkan",
+    "diriku telah hebat bertahan selama ini, selanjutnya jalanku akan dipermudah",
+    "semua masalah menjadi pelajaran bermakna",
+    "masa depan penuh kebahagiaan dan kesuksesan",
+    "kesehatan dan keberkahan selalu menyertai",
+    "rasa syukur tumbuh subur di hati",
+    "impian-impian terwujud dengan lancar",
+    "cinta dan kedamaian mengisi hari-hariku",
+    "semangat untuk terus mencoba tak pernah padam",
+    "perjalanan hidup penuh warna dan kejutan indah",
+    "hari-hari dipenuhi tawa dan cinta",
+    "keberhasilan menghampiri setiap usaha",
+    "kedamaian batin selalu menyertai",
+    "waktu untuk refleksi dan pertumbuhan diri",
+    "setiap langkah mendekat pada tujuan",
+    "hari-hari penuh berkah dan kemudahan",
+    "cahaya harapan menerangi jalanku",
+    "kebaikan tumbuh dalam setiap tindakan",
+    "selalu ada kesempatan untuk memulai kembali",
+    "keberanian menghadapi tantangan makin kuat"
+  ];
+
+  function getRandomIndex(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  function showOnePlantHope() {
+    // Hide seedling and button smoothly
+    seedling.style.transition = 'opacity 0.8s ease';
+    button.style.transition = 'opacity 0.8s ease';
+    seedling.style.opacity = 0;
+    button.style.opacity = 0;
+    button.disabled = true;
+
+    setTimeout(() => {
+      seedling.style.display = 'none';
+      button.style.display = 'none';
+
+      // Pick one random plant and hope
+      const plant = plants[getRandomIndex(plants.length)];
+      const hope = hopes[getRandomIndex(hopes.length)];
+
+      // Fill result container
+      resultContainer.innerHTML = `
+        ${plant.svg}
+        <div>${hope}</div>
+      `;
+      resultContainer.classList.add('show');
+    }, 800);
+  }
+
+  button.addEventListener('click', showOnePlantHope);
+</script>
+</body>
+</html>
+
